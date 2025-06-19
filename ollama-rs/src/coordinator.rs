@@ -129,9 +129,12 @@ impl<C: ChatHistory> Coordinator<C> {
                 };
 
                 let resp = tool
-                    .call(call.function.arguments)
+                    .call(call.function.arguments.clone())
                     .await
-                    .map_err(crate::error::ToolCallError::InternalToolError)?;
+                    .map_err(|e| {
+                        eprintln!("Error: {}, JSON: {}", e, call.function.arguments);
+                        crate::error::ToolCallError::InternalToolError(e)
+                    })?;
 
                 if self.debug {
                     eprintln!("Tool response: {}", &resp);
